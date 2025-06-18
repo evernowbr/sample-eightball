@@ -1,0 +1,82 @@
+name: DevSecOps Pipeline Workflow 
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+ # repository_dispatch:
+ #  types: [fortify_event]
+
+jobs:
+  checkout-code:
+    name: Checkout Code
+    runs-on: self-hosted 
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+#  sonarqube:
+#    name: Sonarqube
+#    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+#    uses: evernowbr/evernow-reusable-workflows/.github/workflows/sonarqube.yml@main 
+#    with:
+#      PROJECT_NAME: ${{ github.ref_name }}   
+#      PROJECT_KEY: ${{ github.repository }}
+ #     BRANCH_NAME: ${{ github.ref_name }}
+#    secrets:
+#      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    
+#  debricked:
+#    name: Debricked
+#    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+#    uses: evernowbr/evernow-reusable-workflows/.github/workflows/debricked.yml@main 
+#    secrets:
+#      DEBRICKED_TOKEN: ${{ secrets.DEBRICKED_TOKEN }}
+
+#  dependency-track:
+#    name: Dependency-Track
+#    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+#    needs: debricked
+#    uses: evernowbr/evernow-reusable-workflows/.github/workflows/dependency-track.yml@main
+#    with:
+#      name: ${{ github.repository }}  
+#      version: ${{ github.ref_name }} 
+#    secrets:
+#      DT_SCA_ENDPOINT: ${{ secrets.DT_SCA_ENDPOINT }}
+#      DT_TOKEN: ${{ secrets.DT_TOKEN }}
+      
+  fortify-sast:
+      name: Fortify
+  #    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+  #    needs:
+  #     - debricked
+   #    - dependency-track
+      uses: evernowbr/evernow-reusable-workflows/.github/workflows/fortify-sast.yml@main
+      with:
+        name: ${{ github.repository }}
+        version: ${{ github.ref_name }}
+        fortify_scancentral_tool: "scancentral"
+        fortify_translate_name: "-bt none"
+        fortify_translate_additional_flags: ""
+      secrets:
+        FORTIFY_SSC_API_URL: ${{ secrets.FORTIFY_SSC_API_URL }}
+        FORTIFY_UNIFIED_LOGIN_TOKEN: ${{ secrets.FORTIFY_UNIFIED_LOGIN_TOKEN }}
+        FORTIFY_CONTROLLER_URL: ${{ secrets.FORTIFY_CONTROLLER_URL }}
+        FORTIFY_CONTROLLER_TOKEN: ${{ secrets.FORTIFY_CONTROLLER_TOKEN }}
+
+  # fortify-webhook-service:
+  #   name: Fortify Webhook SAST
+  #   if: github.event_name == 'repository_dispatch'
+  #   uses: evernowbr/evernow-reusable-workflows/.github/workflows/fortify-webhook-service.yaml@main
+  #   with:
+  #     projectName: ${{ github.event.client_payload.projectName }}
+  #     projectId: ${{ github.event.client_payload.projectId }}
+  #     projectVersionName: ${{ github.event.client_payload.projectVersionName }}
+  #     projectVersionId: ${{ github.event.client_payload.projectVersionId }}
+  #     event: ${{ github.event.client_payload.events[0].event }}
+  #     filename: ${{ github.event.client_payload.events[0].filename }}
+  #     triggeredAt: ${{ github.event.client_payload.triggeredAt }}
+  #     sscUrl: ${{ github.event.client_payload.sscUrl }}
+  #     webHookId: ${{ github.event.client_payload.webHookId }}

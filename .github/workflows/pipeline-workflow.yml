@@ -3,7 +3,7 @@ name: DevSecOps Pipeline Workflow
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
  # repository_dispatch:
  #  types: [fortify_event]
